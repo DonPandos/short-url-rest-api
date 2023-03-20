@@ -2,6 +2,7 @@ package com.bkavun.shorturlrestapi.service.impl;
 
 import com.bkavun.shorturlrestapi.dto.LongUrlDTO;
 import com.bkavun.shorturlrestapi.dto.ShortUrlDTO;
+import com.bkavun.shorturlrestapi.exception.CompressingException;
 import com.bkavun.shorturlrestapi.exception.InvalidUrlException;
 import com.bkavun.shorturlrestapi.service.ShortUrlService;
 import io.seruco.encoding.base62.Base62;
@@ -54,9 +55,8 @@ public class ShortUrlServiceImpl implements ShortUrlService {
             out.close();
             return new String(Base62.createInstance().encode(compressed));
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new CompressingException();
         }
-        return null;
     }
 
     private String gzipDecompress(byte[] compressed) {
@@ -74,9 +74,8 @@ public class ShortUrlServiceImpl implements ShortUrlService {
 
             return out.toString(StandardCharsets.UTF_8);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new CompressingException();
         }
-        return null;
     }
 
 }

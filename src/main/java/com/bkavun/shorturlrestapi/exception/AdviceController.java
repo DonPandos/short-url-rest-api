@@ -17,4 +17,12 @@ public class AdviceController {
                 HttpStatus.BAD_REQUEST
         );
     }
+
+    @ExceptionHandler(CompressingException.class)
+    public ResponseEntity<ErrorDTO> compressingException() {
+        return new ResponseEntity<>(
+                new ErrorDTO("Compressing exception"),
+                HttpStatus.INTERNAL_SERVER_ERROR
+        );
+    }
 }
