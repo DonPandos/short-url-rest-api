@@ -35,7 +35,6 @@ public class ShortUrlController {
     @ApiOperation(value = "Get long url by short url", notes = "Returns long url as per short url")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successfully retrieved"),
-            @ApiResponse(code = 404, message = CommonConst.SHORT_URL_NOT_FOUND_MESSAGE),
             @ApiResponse(code = 400, message = CommonConst.INCORRECT_URL_MESSAGE)
     })
     public ResponseEntity<LongUrlDTO> getLongUrl(@RequestParam

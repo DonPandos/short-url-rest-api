@@ -2,26 +2,25 @@ package com.bkavun.shorturlrestapi.service.impl;
 
 import com.bkavun.shorturlrestapi.dto.LongUrlDTO;
 import com.bkavun.shorturlrestapi.dto.ShortUrlDTO;
-import com.bkavun.shorturlrestapi.entity.ShortUrlEntity;
 import com.bkavun.shorturlrestapi.exception.InvalidUrlException;
-import com.bkavun.shorturlrestapi.exception.ShortUrlNotFoundException;
-import com.bkavun.shorturlrestapi.repository.ShortUrlRepository;
 import com.bkavun.shorturlrestapi.service.ShortUrlService;
+import io.seruco.encoding.base62.Base62;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 @Service
 public class ShortUrlServiceImpl implements ShortUrlService {
 
-    private final ShortUrlRepository shortUrlRepository;
     private final String URL_PREFIX = "https://foobar.com/";
-
-    public ShortUrlServiceImpl(ShortUrlRepository shortUrlRepository) {
-        this.shortUrlRepository = shortUrlRepository;
-    }
 
     @Override
     public ShortUrlDTO createShortUrl(LongUrlDTO dto) {
@@ -33,12 +32,7 @@ public class ShortUrlServiceImpl implements ShortUrlService {
             throw new InvalidUrlException();
         }
 
-        ShortUrlEntity entity = shortUrlRepository.findByLongUrl(longUrl)
-                .orElse(new ShortUrlEntity(longUrl));
-
-        shortUrlRepository.save(entity);
-
-        return new ShortUrlDTO(URL_PREFIX + entity.getCode());
+        return new ShortUrlDTO(URL_PREFIX + gzipCompress(longUrl));
     }
 
     @Override
@@ -47,9 +41,42 @@ public class ShortUrlServiceImpl implements ShortUrlService {
 
         String code = shortUrl.replace(URL_PREFIX, "");
 
-        ShortUrlEntity entity = shortUrlRepository.findById(code)
-                .orElseThrow(ShortUrlNotFoundException::new);
-
-        return new LongUrlDTO(entity.getLongUrl());
+        return new LongUrlDTO(gzipDecompress(code.getBytes(StandardCharsets.UTF_8)));
     }
+
+    private String gzipCompress(String data) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            GZIPOutputStream gzip = new GZIPOutputStream(out);
+            gzip.write(data.getBytes(StandardCharsets.UTF_8));
+            gzip.close();
+            byte[] compressed = out.toByteArray();
+            out.close();
+            return new String(Base62.createInstance().encode(compressed));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private String gzipDecompress(byte[] compressed) {
+        compressed = Base62.createInstance().decode(compressed);
+        try {
+            GZIPInputStream gzip = new GZIPInputStream(new ByteArrayInputStream(compressed));
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = gzip.read(buffer)) > 0) {
+                out.write(buffer, 0, len);
+            }
+            gzip.close();
+            out.close();
+
+            return out.toString(StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

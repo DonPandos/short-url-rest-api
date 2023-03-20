@@ -10,14 +10,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class AdviceController {
 
-    @ExceptionHandler(ShortUrlNotFoundException.class)
-    public ResponseEntity<ErrorDTO> shortUrlNotFoundException() {
-        return new ResponseEntity<>(
-                new ErrorDTO(CommonConst.SHORT_URL_NOT_FOUND_MESSAGE),
-                HttpStatus.NOT_FOUND
-        );
-    }
-
     @ExceptionHandler(InvalidUrlException.class)
     public ResponseEntity<ErrorDTO> incorrectUrlException() {
         return new ResponseEntity<>(
