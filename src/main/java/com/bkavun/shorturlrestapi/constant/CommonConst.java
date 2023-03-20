@@ -5,4 +5,5 @@ public class CommonConst {
     public static final String SHORT_URL_EXAMPLE = "https:/foobar.com/sdfc442aH";
 
     public static final String INCORRECT_URL_MESSAGE = "Invalid URL. Correct and send again";
+    public static final String COMPRESSING_EXCEPTION_MESSAGE = "Compressing exception";
 }

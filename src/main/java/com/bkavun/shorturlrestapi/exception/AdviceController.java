@@ -21,7 +21,7 @@ public class AdviceController {
     @ExceptionHandler(CompressingException.class)
     public ResponseEntity<ErrorDTO> compressingException() {
         return new ResponseEntity<>(
-                new ErrorDTO("Compressing exception"),
+                new ErrorDTO(CommonConst.COMPRESSING_EXCEPTION_MESSAGE),
                 HttpStatus.INTERNAL_SERVER_ERROR
         );
     }
